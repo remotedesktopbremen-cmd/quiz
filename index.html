@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captrain Deutschland - Recruiting Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background-color: #ffffff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header img {
+            height: 60px;
+            max-width: 250px;
+        }
+
+        /* Password Overlay */
+        #passwordOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #003366 0%, #006633 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .password-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .password-container h2 {
+            color: #003366;
+            margin-bottom: 1.5rem;
+        }
+
+        .password-container input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #003366;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .password-container button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #006633;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .password-container button:hover {
+            background-color: #004d26;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: none;
+        }
+
+        /* User Info Form */
+        #userInfoForm {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        #userInfoForm h2 {
+            color: #003366;
+            margin-bottom: 1.5rem;
+        }
+
+        #userInfoForm input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #userInfoForm button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #006633;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #userInfoForm button:hover {
+            background-color: #004d26;
+        }
+
+        /* Quiz Container */
+        #quizContainer {
+            display: none;
+        }
+
+        .quiz-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+
+        .progress-text {
+            color: #003366;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #003366 0%, #006633 100%);
+            transition: width 0.3s ease;
+        }
+
+        .question-container h3 {
+            color: #003366;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .answer-option {
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .answer-option:hover {
+            border-color: #003366;
+            background-color: #f5f5f5;
+        }
+
+        .answer-option.selected {
+            border-color: #006633;
+            background-color: #e8f5e9;
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #006633;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #004d26;
+        }
+
+        .btn-secondary {
+            background-color: #003366;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #002244;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Results */
+        #resultsContainer {
+            display: none;
+        }
+
+        .results-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .results-card h2 {
+            color: #003366;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #006633;
+            margin: 2rem 0;
+        }
+
+        .feedback-text {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header img {
+                height: 40px;
+            }
+
+            .password-container {
+                padding: 2rem;
+            }
+
+            .quiz-card,
+            .results-card {
+                padding: 1.5rem;
+            }
+
+            .score-display {
+                font-size: 2.5rem;
+            }
+
+            .quiz-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Password Overlay -->
+    <div id="passwordOverlay">
+        <div class="password-container">
+            <h2>Willkommen zum Recruiting Quiz</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Bitte geben Sie das Zugangspasswort ein:</p>
+            <input type="password" id="passwordInput" placeholder="Passwort">
+            <button onclick="checkPassword()">Zugang</button>
+            <p class="error-message" id="errorMessage">Falsches Passwort. Bitte versuchen Sie es erneut.</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <img src="https://captrain.es/wp-content/uploads/2025/05/Logo-CT-bleu.webp" alt="Captrain Logo">
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- User Info Form -->
+        <div id="userInfoForm">
+            <h2>Willkommen zum Recruiting Quiz</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Bevor wir starten, bitte geben Sie Ihren Namen ein:</p>
+            <input type="text" id="firstName" placeholder="Vorname" required>
+            <input type="text" id="lastName" placeholder="Nachname" required>
+            <button onclick="startQuiz()">Quiz starten</button>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizContainer">
+            <div class="quiz-card">
+                <div class="progress-container">
+                    <div class="progress-text">Frage <span id="currentQuestion">1</span> von <span id="totalQuestions">25</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="question-container">
+                    <h3 id="questionText"></h3>
+                    <div class="answers" id="answersContainer"></div>
+                </div>
+
+                <div class="quiz-nav">
+                    <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">Zurück</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Weiter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer">
+            <div class="results-card">
+                <h2>Quiz abgeschlossen!</h2>
+                <p style="color: #666; margin-bottom: 1rem;">Vielen Dank, <span id="resultName"></span>!</p>
+                <div class="score-display" id="scoreDisplay"></div>
+                <p class="feedback-text" id="feedbackText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // KONFIGURATION - HIER KÖNNEN SIE ÄNDERUNGEN VORNEHMEN
+        // ========================================
+        
+        // Passwort für den Zugang (ändern Sie "CTD2026" zu Ihrem gewünschten Passwort)
+        const CORRECT_PASSWORD = "CTD2026";
+        
+        // E-Mail-Adresse für die Ergebnisse
+        const RECRUITING_EMAIL = "recruiting@captrain.de";
+        
+        // Quiz-Fragen (Sie können hier Fragen hinzufügen, entfernen oder ändern)
+        // Format: { question: "Fragetext", answers: ["Antwort 1", "Antwort 2", ...], correct: Index der richtigen Antwort (0-3) }
+        const quizQuestions = [
+            {
+                question: "Welche Aussage beschreibt am besten die Rolle eines Rangierlokführers?",
+                answers: [
+                    "Hauptsächlich Fernverkehr zwischen verschiedenen Städten",
+                    "Verschieben von Waggons innerhalb eines begrenzten Bereichs",
+                    "Wartung und Reparatur von Lokomotiven",
+                    "Verwaltung des Fahrplans"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was bedeutet 'Werksbahn' in diesem Kontext?",
+                answers: [
+                    "Eine Bahn, die nur für den öffentlichen Verkehr genutzt wird",
+                    "Ein internes Bahnsystem innerhalb eines Industriegeländes",
+                    "Eine Werkstatt für Schienenfahrzeuge",
+                    "Ein Ausbildungszentrum für Lokführer"
+                ],
+                correct: 1
+            },
+            {
+                question: "Wie lang ist die Ausbildung zum Rangierlokführer bei uns?",
+                answers: [
+                    "3 Monate",
+                    "6 Monate",
+                    "12 Monate",
+                    "24 Monate"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welche Eigenschaft ist für einen Rangierlokführer besonders wichtig?",
+                answers: [
+                    "Schnelles Fahren",
+                    "Konzentration und Präzision",
+                    "Verkauf von Fahrkarten",
+                    "Kenntnisse in Fremdsprachen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Ergänzen Sie den Satz korrekt: 'Der Lokführer ____ die Bremsen prüfen, bevor er losfährt.'",
+                answers: [
+                    "können",
+                    "muss",
+                    "wollt",
+                    "haben"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was bedeutet das Wort 'rangieren' in der Fachsprache?",
+                answers: [
+                    "Einen Zug reparieren",
+                    "Waggons zu einem Zug zusammenstellen oder umstellen",
+                    "Eine Lok reinigen",
+                    "Fahrkarten kontrollieren"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welches dieser Worte ist ein Synonym für 'vorsichtig'?",
+                answers: [
+                    "Schnell",
+                    "Umsichtig",
+                    "Laut",
+                    "Bequem"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist eine 'Weiche' im Eisenbahnbetrieb?",
+                answers: [
+                    "Ein weiches Sitzkissen",
+                    "Eine Vorrichtung zum Umleiten von Zügen auf andere Gleise",
+                    "Ein Sicherheitsgurt",
+                    "Eine Art Bremsanlage"
+                ],
+                correct: 1
+            },
+            {
+                question: "Warum ist Teamarbeit im Bahnbetrieb wichtig?",
+                answers: [
+                    "Um Kosten zu sparen",
+                    "Um sicheren und reibungslosen Ablauf zu gewährleisten",
+                    "Um weniger arbeiten zu müssen",
+                    "Es ist nicht wichtig"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was motiviert Sie, sich als Quereinsteiger für diesen Beruf zu bewerben?",
+                answers: [
+                    "Ich suche eine neue Herausforderung und interessiere mich für Technik",
+                    "Ich möchte weniger arbeiten",
+                    "Ich wurde dazu gezwungen",
+                    "Ich weiß es nicht"
+                ],
+                correct: 0
+            },
+            {
+                question: "Welche Schichtarbeit ist im Bahnbetrieb üblich?",
+                answers: [
+                    "Nur Tagschicht von 9-17 Uhr",
+                    "Früh-, Spät- und Nachtschichten",
+                    "Nur am Wochenende",
+                    "Flexible Homeoffice-Zeiten"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist bei technischen Geräten wichtig zu beachten?",
+                answers: [
+                    "Sie müssen nur gut aussehen",
+                    "Bedienungsanleitungen und Sicherheitsvorschriften befolgen",
+                    "Man kann sie nach Gefühl bedienen",
+                    "Sie brauchen keine Wartung"
+                ],
+                correct: 1
+            },
+            {
+                question: "Ein Waggon wiegt 20 Tonnen. Wie viel wiegen 3 solcher Waggons?",
+                answers: [
+                    "23 Tonnen",
+                    "40 Tonnen",
+                    "60 Tonnen",
+                    "80 Tonnen"
+                ],
+                correct: 2
+            },
+            {
+                question: "Welche Ausrüstung gehört NICHT zur Standardausrüstung eines Lokführers?",
+                answers: [
+                    "Funkgerät",
+                    "Sicherheitsschuhe",
+                    "Warnweste",
+                    "Taschenrechner"
+                ],
+                correct: 3
+            },
+            {
+                question: "Was bedeutet 'Verantwortungsbewusstsein' im Arbeitskontext?",
+                answers: [
+                    "Anderen die Schuld geben",
+                    "Aufgaben gewissenhaft und zuverlässig ausführen",
+                    "Nur das Nötigste tun",
+                    "Immer Überstunden machen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Wie sollten Sie auf eine unerwartete Situation im Betrieb reagieren?",
+                answers: [
+                    "Panik bekommen und weglaufen",
+                    "Ruhe bewahren und den Vorgesetzten informieren",
+                    "Ignorieren und weitermachen",
+                    "Nach Hause gehen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welche körperliche Anforderung ist für den Beruf wichtig?",
+                answers: [
+                    "Marathonläufer sein",
+                    "Grundlegende körperliche Fitness und gesundheitliche Eignung",
+                    "Profisportler sein",
+                    "Es gibt keine körperlichen Anforderungen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist ein 'Signal' im Eisenbahnbetrieb?",
+                answers: [
+                    "Ein Handzeichen zwischen Kollegen",
+                    "Eine optische oder akustische Anzeige für den Lokführer",
+                    "Ein Mobiltelefon-Signal",
+                    "Ein Fahrkartenautomat"
+                ],
+                correct: 1
+            },
+            {
+                question: "Warum sind regelmäßige Sicherheitsschulungen wichtig?",
+                answers: [
+                    "Um Zeit zu verschwenden",
+                    "Um Unfälle zu vermeiden und aktuelles Wissen zu erhalten",
+                    "Sie sind nicht wichtig",
+                    "Nur für neue Mitarbeiter"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welche Einstellung ist im Umgang mit Kollegen wichtig?",
+                answers: [
+                    "Einzelgänger sein",
+                    "Respektvoll und kooperativ",
+                    "Konkurrenzdenken",
+                    "Gleichgültigkeit"
+                ],
+                correct: 1
+            },
+            {
+                question: "Ein Zug fährt mit 30 km/h. Wie weit kommt er in 2 Stunden?",
+                answers: [
+                    "30 km",
+                    "60 km",
+                    "90 km",
+                    "120 km"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was bedeutet 'Prävention' im Sicherheitskontext?",
+                answers: [
+                    "Nachträgliche Reparatur",
+                    "Vorbeugende Maßnahmen zur Unfallvermeidung",
+                    "Ignorieren von Risiken",
+                    "Schuldzuweisung"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welche dieser Situationen erfordert sofortige Meldung?",
+                answers: [
+                    "Eine leere Kaffeetasse",
+                    "Ein technischer Defekt an der Lok",
+                    "Ein verspäteter Kollege",
+                    "Schlechtes Wetter"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist wichtiger: Schnelligkeit oder Sicherheit?",
+                answers: [
+                    "Schnelligkeit",
+                    "Sicherheit geht immer vor",
+                    "Beides ist gleich unwichtig",
+                    "Es kommt drauf an"
+                ],
+                correct: 1
+            },
+            {
+                question: "Warum ist kontinuierliches Lernen auch nach der Ausbildung wichtig?",
+                answers: [
+                    "Um andere zu beeindrucken",
+                    "Um mit technischen Neuerungen und Vorschriften Schritt zu halten",
+                    "Es ist nicht wichtig",
+                    "Nur für Aufstiegschancen"
+                ],
+                correct: 1
+            }
+        ];
+        
+        // ========================================
+        // AB HIER MÜSSEN SIE NICHTS MEHR ÄNDERN
+        // ========================================
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let userName = { first: "", last: "" };
+
+        // Password Check
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('passwordOverlay').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // Allow Enter key for password
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+        });
+
+        // Start Quiz
+        function startQuiz() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            
+            if (!firstName || !lastName) {
+                alert('Bitte geben Sie Ihren Vor- und Nachnamen ein.');
+                return;
+            }
+            
+            userName.first = firstName;
+            userName.last = lastName;
+            
+            document.getElementById('userInfoForm').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            
+            loadQuestion();
+        }
+
+        // Load Question
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = quizQuestions.length;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Load answers
+            const answersContainer = document.getElementById('answersContainer');
+            answersContainer.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-option';
+                answerDiv.textContent = answer;
+                answerDiv.onclick = () => selectAnswer(index);
+                
+                if (userAnswers[currentQuestionIndex] === index) {
+                    answerDiv.classList.add('selected');
+                }
+                
+                answersContainer.appendChild(answerDiv);
+            });
+            
+            // Update buttons
+            document.getElementById('prevBtn').style.display = currentQuestionIndex > 0 ? 'block' : 'none';
+            document.getElementById('nextBtn').textContent = currentQuestionIndex === quizQuestions.length - 1 ? 'Ergebnis anzeigen' : 'Weiter';
+            document.getElementById('nextBtn').disabled = userAnswers[currentQuestionIndex] === undefined;
+        }
+
+        // Select Answer
+        function selectAnswer(index) {
+            userAnswers[currentQuestionIndex] = index;
+            
+            // Update UI
+            const options = document.querySelectorAll('.answer-option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+            
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // Next Question
+        function nextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Previous Question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        // Show Results
+        function showResults() {
+            let score = 0;
+            quizQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.correct) {
+                    score++;
+                }
+            });
+            
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            document.getElementById('resultName').textContent = `${userName.first} ${userName.last}`;
+            document.getElementById('scoreDisplay').textContent = `${score} / ${quizQuestions.length}`;
+            
+            // Feedback based on score
+            let feedback = '';
+            const percentage = (score / quizQuestions.length) * 100;
+            
+            if (percentage >= 80) {
+                feedback = 'Hervorragend! Sie haben sehr gute Kenntnisse und Motivation gezeigt.';
+            } else if (percentage >= 60) {
+                feedback = 'Gutes Ergebnis! Sie zeigen grundlegendes Verständnis und Interesse. Mit etwas Vorbereitung sind Sie gut aufgestellt.';
+            } else if (percentage >= 40) {
+                feedback = 'Solides Ergebnis. Es gibt noch Raum für Verbesserungen, aber Ihre Motivation ist erkennbar.';
+            } else {
+                feedback = 'Vielen Dank für Ihre Teilnahme. Wir empfehlen, sich noch etwas intensiver mit dem Berufsbild auseinanderzusetzen.';
+            }
+            
+            document.getElementById('feedbackText').textContent = feedback;
+        }
+    </script>
+</body>
+</html>
